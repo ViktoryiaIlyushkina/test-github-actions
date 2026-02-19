@@ -106,4 +106,14 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release -o ./publish
 
-      - name: Verify publish
+      - name: Verify publish folder
+        run: ls -R ./publish
+
+      - name: Create ZIP
+        run: zip -r webapi.zip ./publish
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapi
+          path: webapi.zip
