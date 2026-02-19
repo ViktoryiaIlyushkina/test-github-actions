@@ -80,36 +80,3 @@ jobs:
         run: dotnet test --configuration Release --no-build
 
 
-  # ===================== PUBLISH =====================
-  publish:
-    name: Publish & Zip Artifact
-    runs-on: ubuntu-latest
-    needs: tests
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      # Публикация в ./publish
-      - name: Publish
-        run: dotnet publish -c Release -o ./publish
-
-      # Проверка, что папка существует
-      - name: Verify publish folder
-        run: ls -R ./publish
-
-      # Создание ZIP
-      - name: Create ZIP
-        run: zip -r webapi.zip ./publish
-
-      # Публикация артефакта
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapi
-          path: webapi.zip
