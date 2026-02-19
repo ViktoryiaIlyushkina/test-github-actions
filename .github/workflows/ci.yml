@@ -43,16 +43,20 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # Проверка форматирования
       - name: Install dotnet-format
         run: dotnet tool install -g dotnet-format
 
       - name: Run dotnet format
         run: dotnet format --verify-no-changes
 
-      # Тесты с покрытием + warnings as errors
       - name: Run tests with coverage (warnings as errors)
-        run: dotnet test --configuration Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:TreatWarningsAsErrors=true
+        run: |
+          dotnet test ./tests/TextAnalysisService.Tests/TextAnalysisService.Tests.csproj \
+            --configuration Release \
+            --no-build \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=cobertura \
+            /p:TreatWarningsAsErrors=true
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
@@ -77,7 +81,11 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Run tests (warnings as errors)
-        run: dotnet test --configuration Release --no-build /p:TreatWarningsAsErrors=true
+        run: |
+          dotnet test ./tests/TextAnalysisService.Tests/TextAnalysisService.Tests.csproj \
+            --configuration Release \
+            --no-build \
+            /p:TreatWarningsAsErrors=true
 
 
   # ===================== PUBLISH =====================
@@ -98,14 +106,4 @@ jobs:
       - name: Publish
         run: dotnet publish -c Release -o ./publish
 
-      - name: Verify publish folder
-        run: ls -R ./publish
-
-      - name: Create ZIP
-        run: zip -r webapi.zip ./publish
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: webapi
-          path: webapi.zip
+      - name: Verify publish
