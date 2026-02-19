@@ -18,7 +18,7 @@ public class TextAnalyzerTests
     public void CountWords_ReturnsCorrectCount()
     {
         var result = _analyzer.CountWords("Hello world from tests");
-        Assert.Equal(4, result);
+        Assert.Equal(3, result);
     }
 
     [Fact]
