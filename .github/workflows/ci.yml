@@ -95,12 +95,19 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      # Публикация в ./publish
       - name: Publish
-        run: dotnet publish -c Release -o publish
+        run: dotnet publish -c Release -o ./publish
 
+      # Проверка, что папка существует
+      - name: Verify publish folder
+        run: ls -R ./publish
+
+      # Создание ZIP
       - name: Create ZIP
-        run: zip -r webapi.zip publish/
+        run: zip -r webapi.zip ./publish
 
+      # Публикация артефакта
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
