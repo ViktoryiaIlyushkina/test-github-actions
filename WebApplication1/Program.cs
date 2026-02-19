@@ -1,3 +1,5 @@
+using TextAnalysisService;
+
 namespace WebApplication1
 {
     public class Program
@@ -8,6 +10,10 @@ namespace WebApplication1
 
             // Add services to the container.
             builder.Services.AddAuthorization();
+
+
+            // Add Text Analyzer Service
+            builder.Services.AddScoped<ITextAnalyzer, TextAnalyzer>();
 
 
             var app = builder.Build();
@@ -34,6 +40,15 @@ namespace WebApplication1
                     })
                     .ToArray();
                 return forecast;
+            });
+
+            app.MapGet("/analyze", (string text, ITextAnalyzer analyzer) =>
+            {
+                return new
+                {
+                    Words = analyzer.CountWords(text),
+                    Characters = analyzer.CountCharacters(text)
+                };
             });
 
             app.Run();
