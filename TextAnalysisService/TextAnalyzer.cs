@@ -2,7 +2,7 @@
 
 public class TextAnalyzer : ITextAnalyzer
 {
-    public int CountWords(string text)
+    public int CountWords(string? text)
     {
         if (string.IsNullOrWhiteSpace(text))
             return 0;
@@ -12,11 +12,8 @@ public class TextAnalyzer : ITextAnalyzer
             .Length;
     }
 
-    public int CountCharacters(string text)
+    public int CountCharacters(string? text)
     {
-        if (text is null)
-            return 0;
-
-        return text.Length;
+        return text?.Length ?? 0;
     }
 }

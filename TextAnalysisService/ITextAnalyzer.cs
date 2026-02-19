@@ -2,7 +2,7 @@
 
 public interface ITextAnalyzer
 {
-    int CountWords(string text);
-    int CountCharacters(string text);
+    int CountWords(string? text);
+    int CountCharacters(string? text);
 }
 
