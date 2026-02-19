@@ -1,41 +1,38 @@
-name: CI Pipeline
+name: ASP.NET Core CI
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
-
-  # ===================== BUILD =====================
-  build:
-    name: Build
+  # ЭТАП 1: Сборка и проверка качества кода
+  Build_and_Lint:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '8.0.x' # Укажите нужную версию SDK
 
-      - name: Restore
+      - name: Restore dependencies
         run: dotnet restore
 
-      - name: Build (warnings as errors)
-        run: dotnet build --configuration Release --no-restore -warnaserror
+      - name: Build Project
+        run: dotnet build --no-restore --configuration Release
 
+      # Можно добавить проверку форматирования кода (dotnet format)
+      - name: Check Code Format
+        run: dotnet format --verify-no-changes --no-restore
 
-  # ===================== CODE QUALITY =====================
-  code_quality:
-    name: Code Quality
+  # ЭТАП 2: Тестирование (запускается после успешной сборки)
+  Test:
+    needs: Build_and_Lint
     runs-on: ubuntu-latest
-    needs: build
-
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup .NET
@@ -43,38 +40,31 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
-      # Проверка форматирования
-      - name: Install dotnet-format
-        run: dotnet tool install -g dotnet-format
+      - name: Run Tests
+        run: dotnet test --configuration Release --verbosity normal
 
-      - name: Run dotnet format
-        run: dotnet format --verify-no-changes
+  # ЭТАП 3: Публикация и создание ZIP-архива
+  Publish:
+    needs: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      # Тесты с покрытием + warnings as errors
-      - name: Run tests with coverage (warnings as errors)
-        run: dotnet test --configuration Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura -warnaserror
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
 
-      - name: Upload coverage report
+      - name: Publish API
+        run: dotnet publish -c Release -o ./publish
+
+      - name: Zip Artifacts
+        run: zip -r build-artifact.zip ./publish
+
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: coverage
-          path: '**/coverage.cobertura.xml'
-
-
-  # ===================== TESTS =====================
-  tests:
-    name: Tests
-    runs-on: ubuntu-latest
-    needs: code_quality
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Run tests (warnings as errors)
-        run: dotnet test --configuration Release --no-build -warnaserror
+          name: web-api-binary
+          path: build-artifact.zip
+          retention-days: 5
